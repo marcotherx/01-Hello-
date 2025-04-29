@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Portal de Integração - PortosRio</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; background-color: #f0f4f8; }
+    .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.2); margin-top: 40px; }
+    h1, h2, h3 { text-align: center; }
+    button { background-color: #004080; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 20px; }
+    button:hover { background-color: #0066cc; }
+    .hidden { display: none; }
+    input { padding: 10px; width: 100%; margin-top: 10px; margin-bottom: 20px; }
+    ul { text-align: left; }
+    img { display: block; margin: auto; width: 450px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <img src="https://www.portosrio.gov.br/sites/default/files/2024-09/chamada-para-a-logomarca-nova.jpg">   
+
+  <div id="inicio">
+    <h1>Seja bem-vindo(a) à sua nova jornada na PortosRio!</h1>
+    <p>Antes de começar, por favor, digite seu nome completo:</p>
+    <input type="text" id="nome" placeholder="Seu nome completo" />
+    <p>Prepare-se para conhecer seus direitos, deveres e construir um futuro brilhante conosco.</p>
+    <button onclick="proximoModulo('orientacao')">Começar Ambientação</button>
+  </div>
+
+  <div id="orientacao" class="hidden">
+    <h2>Antes de Começar</h2>
+    <p>É importante ler atentamente os documentos e informações a seguir para responder ao quiz corretamente.</p>
+    <button onclick="abrirDocumentos()">Ler Documentos</button>
+  </div>
+
+  <div id="conteudo" class="hidden">
+    <h2>Resumo das Responsabilidades</h2>
+    <ul>
+      <li>Ser assíduo e pontual. Jornada de 4 horas diárias.</li>
+      <li>Desempenhar tarefas com responsabilidade e respeito ao Código de Ética.</li>
+      <li>Comunicar mudanças de endereço, escola ou horários.</li>
+      <li>Não atuar em áreas de risco.</li>
+      <li>Tratar todos com respeito, sem discriminação.</li>
+    </ul>
+    <button onclick="proximoModulo('quiz')">Ir para o Quiz</button>
+  </div>
+
+  <div id="quiz" class="hidden">
+    <h2>Quiz de Fixação</h2>
+    <div id="pergunta"></div>
+    <div id="opcoes"></div>
+  </div>
+
+  <div id="finalizacao" class="hidden">
+    <h2>Parabéns! Você terminou o curso.</h2>
+    <button onclick="gerarCertificado()">Gerar Certificado</button>
+  </div>
+</div>
+
+<script>
+const perguntas = [
+  { pergunta: "O Aprendiz pode entrar em áreas de risco dentro da empresa?", opcoes: ["Sim", "Não"], correta: 1 },
+  { pergunta: "Qual setor deve ser informado sobre mudanças de endereço?", opcoes: ["GERCAR", "SUPREC", "Diretoria"], correta: 0 },
+  { pergunta: "O empregado deve tratar todos com respeito, sem discriminação.", opcoes: ["Verdadeiro", "Falso"], correta: 0 },
+  { pergunta: "Qual é a carga horária diária do Aprendiz?", opcoes: ["6 horas", "4 horas", "8 horas"], correta: 1 },
+  { pergunta: "O Aprendiz pode prestar serviços externos sem autorização?", opcoes: ["Sim", "Não"], correta: 1 },
+  { pergunta: "O Estagiário/Jovem aprendiz deve andar sempre com o crachá na altura do tórax.", opcoes: ["Verdadeiro", "Falso"], correta: 0 },
+  { pergunta: "O Estagiário/Jovem aprendiz tem direito a recesso de 15 dias a partir do quinto mês de contrato ou 30 dias a partir do décimo primeiro mês?", opcoes: ["Sim", "Não"], correta: 0 },
+];
+
+let indice = 0;
+let pontuacao = 0;
+
+function proximoModulo(id) {
+  document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+  if (id === 'quiz') {
+    indice = 0;
+    pontuacao = 0;
+    mostrarPergunta();
+  }
+}
+
+function mostrarPergunta() {
+  if (indice < perguntas.length) {
+    const atual = perguntas[indice];
+    document.getElementById('pergunta').innerHTML = `<h3>${atual.pergunta}</h3>`;
+    document.getElementById('opcoes').innerHTML = atual.opcoes.map((op, i) => `<button onclick="verificarResposta(${i})">${op}</button>`).join('<br><br>');
+  } else {
+    proximoModulo('finalizacao');
+  }
+}
+
+function verificarResposta(escolha) {
+  if (escolha === perguntas[indice].correta) {
+    pontuacao++;
+    alert('Resposta correta!');
+  } else {
+    alert('Resposta incorreta.');
+  }
+  indice++;
+  mostrarPergunta();
+}
+
+function gerarCertificado() {
+  const nome = document.getElementById('nome').value.trim();
+  if (!nome) { alert('Por favor, preencha seu nome!'); return; }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'landscape' });
+
+  const larguraPagina = doc.internal.pageSize.getWidth();
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(30);
+  doc.text('CERTIFICADO', larguraPagina/2, 40, { align: 'center' });
+
+  doc.setFont('times', 'normal');
+  doc.setFontSize(18);
+  doc.text('Certificamos que', larguraPagina/2, 60, { align: 'center' });
+
+  doc.setFont('times', 'bolditalic');
+  doc.setFontSize(22);
+  doc.text(nome, larguraPagina/2, 75, { align: 'center' });
+
+  doc.setFont('times', 'normal');
+  doc.setFontSize(16);
+  doc.text('concluiu com sucesso o Curso de Ambientação de', larguraPagina/2, 90, { align: 'center' });
+  doc.text('Jovens Aprendizes e Estagiários da PortosRio,', larguraPagina/2, 100, { align: 'center' });
+  doc.text(`obtendo ${pontuacao} acertos de ${perguntas.length} questões.`, larguraPagina/2, 110, { align: 'center' });
+
+  doc.setFontSize(14);
+  doc.text(`Rio de Janeiro, ${new Date().toLocaleDateString('pt-BR')}`, larguraPagina/2, 130, { align: 'center' });
+
+  doc.line(larguraPagina/2 - 40, 150, larguraPagina/2 + 40, 150); 
+  doc.text('Gerência de Gestão de Carreiras (GERCAR)', larguraPagina/2, 160, { align: 'center' });
+
+  doc.save(`Certificado-${nome}.pdf`);
+}
+
+function abrirDocumentos() {
+  window.open('https://drive.google.com/file/d/1h-56hd-Khmq6dwYMdw9zpaCKU3t5KK9f/view', '_blank');
+  window.open('https://drive.google.com/file/d/1YUjAUGJWJSGw5FVJA6e6v_K-pyaE24cR/view', '_blank');
+  window.open('https://drive.google.com/file/d/1_6EKSqzHX6FmDfwt4Knf_qeYmJUNLkEJ/view', '_blank');
+  proximoModulo('conteudo');
+}
+</script>
+</body>
+</html>
